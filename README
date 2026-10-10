@@ -1,0 +1,25 @@
+fastreindex - Fast Reindex plugin for DokuWiki
+==============================================
+
+Refreshes the tag and search index after you edited, added or copied page
+files directly (outside of the wiki editor). Unchanged pages are skipped.
+
+Modes
+-----
+* Tags only (fast): updates the "subject" metadata index used by the tag
+  plugin (tag lists, tag links). Only pages that contain {{tag>...}} or have
+  subject metadata are processed.
+* Full index: runs DokuWiki's own indexer (idx_addPage) for changed pages and
+  updates the fulltext search index too. Slower.
+
+Usage
+-----
+Admin -> Fast Reindex -> Start. Keep the page open until it finishes.
+Requires admin rights. The tag plugin is optional (only used to clean tags).
+
+Install
+-------
+Copy this folder to lib/plugins/fastreindex/ (folder name must be exactly
+"fastreindex") or install through the Extension Manager.
+
+License: GPL 2 (see http://www.gnu.org/licenses/gpl.html)
