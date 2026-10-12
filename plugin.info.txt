@@ -1,7 +1,7 @@
 base   fastreindex
 author iamtalker
 email  mysticacala@gmail.com
-date   2026-10-10
+date   2026-10-12
 name   Fast Reindex
 desc   Fast tag/search index refresh for pages edited directly as text files
 url    https://www.dokuwiki.org/plugin:fastreindex

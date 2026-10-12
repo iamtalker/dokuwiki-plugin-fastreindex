@@ -151,6 +151,9 @@ class admin_plugin_fastreindex extends DokuWiki_Admin_Plugin
     }
     update('');
     $('fri_msg').textContent = stopFlag ? t.stopped : fmtMsg(t.done, ok, skip, failedList.length);
+    if (failedList.length) {
+      $('fri_cur').textContent = failedList.slice(0, 100).join(', ') + (failedList.length > 100 ? ' ...' : '');
+    }
     $('fri_start').disabled = false; $('fri_stop').disabled = true; running = false;
   }
   $('fri_start').onclick = function () { if (!running) run(); };

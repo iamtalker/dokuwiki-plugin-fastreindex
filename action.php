@@ -98,7 +98,22 @@ class action_plugin_fastreindex extends DokuWiki_Action_Plugin
                 $res[$p] = 'skip';
                 continue;
             }
-            $r = idx_addPage($p, false, true);
+            try {
+                if (class_exists('\dokuwiki\Search\Indexer')) {
+                    // call the indexer directly so exceptions are not swallowed
+                    $r = (new \dokuwiki\Search\Indexer())->addPage($p, true);
+                } else {
+                    $r = idx_addPage($p, false, true);
+                }
+            } catch (\Throwable $e) {
+                $r = false;
+                $msg = 'fastreindex: ' . $p . ': ' . get_class($e) . ': ' . $e->getMessage();
+                if (class_exists('\dokuwiki\Logger')) {
+                    \dokuwiki\Logger::error($msg);
+                } else {
+                    error_log($msg);
+                }
+            }
             $res[$p] = ($r === true) ? 'ok' : 'fail';
         }
         return $res;
