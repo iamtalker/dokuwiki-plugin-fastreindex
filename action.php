@@ -85,7 +85,10 @@ class action_plugin_fastreindex extends DokuWiki_Action_Plugin
      */
     protected function indexFull(array $pages)
     {
-        $ver = idx_get_version();
+        // idx_get_version() was removed in recent DokuWiki releases
+        $ver = function_exists('idx_get_version')
+            ? idx_get_version()
+            : (new \dokuwiki\Search\Indexer())->getVersion();
         $res = [];
         foreach ($pages as $p) {
             $tag = metaFN($p, '.indexed');
