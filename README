@@ -6,21 +6,77 @@ files directly (outside of the wiki editor). Unchanged pages are skipped.
 
 Modes
 -----
-* Tags only (fast): updates the "subject" metadata index used by the tag
-  plugin (tag lists, tag links). Only pages that contain {{tag>...}} or have
-  subject metadata are processed.
-* Full index: runs DokuWiki's own indexer (idx_addPage) for changed pages and
-  updates the fulltext search index too. Slower.
+* Tags only: updates the "subject" metadata index used by the tag plugin
+  (tag lists, tag links). Only pages that contain {{tag>...}} or already have
+  subject metadata are processed. Much faster than a full index because it
+  does not index page bodies.
+* Full index: runs DokuWiki's own indexer (Indexer::addPage) for changed
+  pages and updates the fulltext search index too.
 
 Usage
 -----
 Admin -> Fast Reindex -> Start. Keep the page open until it finishes.
 Requires admin rights. The tag plugin is optional (only used to clean tags).
 
+Performance notes
+-----------------
+What is fast, and what is not:
+
+* Tags only mode is fast. Full index mode calls the same core indexer as
+  DokuWiki itself, so the time per page is about the same as the built-in
+  indexing. This plugin does not make that part faster.
+* What the plugin adds: batching with progress/remaining time, skipping pages
+  that are already up to date, an automatic retry of failed pages, and a
+  stop/resume that does not redo finished pages.
+* No benchmark numbers are published yet.
+
+Why a full index can take long:
+
+* Every page has to be rendered to get its title, links and media, so all
+  installed syntax plugins run for every page. After clearing the cache or
+  copying pages from another wiki, nothing is cached and the first run pays
+  this cost once. Later runs only handle changed pages.
+* Large single pages dominate the run time (cost grows with page size). A few
+  multi-megabyte pages can take as long as hundreds of small ones.
+* Each page updates several index files with locking; antivirus real-time
+  scanning of the data folder makes this noticeably slower. Excluding the wiki
+  folder from real-time scanning can help.
+
+Tips:
+
+* Do not browse the wiki in another tab while a full index run is in progress.
+  DokuWiki's own background indexer then competes for the same locks and
+  single pages can fail.
+* If you only need tag pages updated, use Tags only mode.
+* Run Full index once after copying a wiki; afterwards only changed pages are
+  processed.
+
+Troubleshooting
+---------------
+* "Failed" pages are retried once automatically. When a run finishes, the
+  names of failed pages (up to 100) are shown under the progress table.
+* Indexer exceptions are written to the DokuWiki error log
+  (data/log/error/<date>.log) as:
+    fastreindex: <page>: <ExceptionClass>: <message>
+* Warnings such as "Undefined array key" for date/user/description usually come
+  from other plugins reading page metadata that does not exist because
+  data/meta was not copied along with data/pages. They do not come from this
+  plugin and are harmless for indexing.
+
 Install
 -------
 Copy this folder to lib/plugins/fastreindex/ (folder name must be exactly
 "fastreindex") or install through the Extension Manager.
+
+Changelog
+---------
+1.0.1 (2026-10-12)
+  * Fix full index mode on recent DokuWiki releases (idx_get_version() was
+    removed; uses Indexer::getVersion()).
+  * Log indexer exceptions to the error log instead of silently counting them.
+  * Show the names of failed pages when a run finishes.
+1.0.0 (2026-10-10)
+  * Initial release.
 
 License: GPL 2 (see http://www.gnu.org/licenses/gpl.html)
 
